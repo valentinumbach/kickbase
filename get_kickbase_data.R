@@ -3,18 +3,19 @@ library(httr)
 library(plyr)
 library(dplyr)
 
-source('config.R')
-
 # set up connection
-host <- 'api.kkstr.com'
-headers <- add_headers(
-  `user-agent` = kickbase_user_agent,
-  `connection` = 'Keep-Alive',
-  `accept-encoding` = 'gzip'
-)
+set_kickbase_connection <- function(kickbase_user_agent) {
+  host <- 'api.kkstr.com'
+  headers <- add_headers(
+    `user-agent` = kickbase_user_agent,
+    `connection` = 'Keep-Alive',
+    `accept-encoding` = 'gzip'
+  )
+  list(host = host, headers = headers)
+}
 
 # log in to get authentication cookie and ids
-kickbase_login <- function() {
+kickbase_login <- function(user, password, host = 'api.kkstr.com') {
   credentials <- list(email = kickbase_user,
                       password = kickbase_password,
                       ext = 'false')
@@ -22,20 +23,21 @@ kickbase_login <- function() {
   url <- paste0(host, '/user/login')
   r <- POST(url, body = credentials_json, content_type_json(), encode = 'json')
   ck <- cookies(r)
-  cookie <<- set_cookies(kkstrauth = ck$value)
+  cookie <- set_cookies(kkstrauth = ck$value)
   c <- content(r)
-  user_id <<- c$user$id
-  league_id <<- c$leagues[[1]]$id
+  user_id <- c$user$id
+  league_id <- c$leagues[[1]]$id
+  list(cookie = cookie, user_id = user_id, league_id = league_id)
 }
 
-get_teams <- function() {
-  data_url <- paste0(host, '/competition/table')
-  r <- GET(data_url, headers, cookie)
+get_teams <- function(headers, cookie, host = 'api.kkstr.com') {
+  url <- paste0(host, '/competition/table')
+  r <- GET(url, headers, cookie)
   c <- content(r)
   teams <- ldply(c$t, data.frame)
 }
 
-get_players <- function(team_ids) {
+get_players <- function(team_ids, headers, cookie, host = 'api.kkstr.com') {
   for (t in team_ids) {
     url <- paste0(host, '/competition/teams/', t, '/players')
     r <- GET(url, headers)
@@ -49,7 +51,7 @@ get_players <- function(team_ids) {
   return(players)
 }
 
-get_performance <- function(player_ids, match_days = 20) {
+get_performance <- function(player_ids, match_days = 20, headers, cookie, host = 'api.kkstr.com') {
   for (p in player_ids) {
     url <- paste0(host, '/leagues/', league_id, '/players/', p, '/feed?start=0&filter=10')
     r <- GET(url, headers)
@@ -64,7 +66,7 @@ get_performance <- function(player_ids, match_days = 20) {
   return(performance)
 }
 
-get_market_values <- function(player_ids, days = 90) {
+get_market_values <- function(player_ids, days = 90, headers, cookie, host = 'api.kkstr.com') {
   for (p in player_ids) {
     url <- paste0(host, '/leagues/', league_id, '/players/', p, '/stats')
     r <- GET(url, headers)
@@ -82,7 +84,7 @@ get_market_values <- function(player_ids, days = 90) {
     } else {
       market_values <- union_all(market_values, market_values0)
     }
-    ### additional data returned from API call, currently not returned
+    ### additional data returned from API call, currently not handled:
     # seasons <- ldply(c$seasons, data.frame, stringsAsFactors = F)
     # nextMatches <- ldply(c$nm, data.frame, stringsAsFactors = F)
     # leaguePlayer <- data.frame(c$leaguePlayer, stringsAsFactors = F)
