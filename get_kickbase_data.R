@@ -51,7 +51,7 @@ get_players <- function(team_ids, headers, cookie, host = 'api.kkstr.com') {
   return(players)
 }
 
-get_performance <- function(player_ids, match_days = 20, headers, cookie, host = 'api.kkstr.com') {
+get_performance <- function(player_ids, league_id, match_days = 20, headers, cookie, host = 'api.kkstr.com') {
   for (p in player_ids) {
     url <- paste0(host, '/leagues/', league_id, '/players/', p, '/feed?start=0&filter=10')
     r <- GET(url, headers)
@@ -66,7 +66,7 @@ get_performance <- function(player_ids, match_days = 20, headers, cookie, host =
   return(performance)
 }
 
-get_market_values <- function(player_ids, days = 90, headers, cookie, host = 'api.kkstr.com') {
+get_market_values <- function(player_ids, league_id, days = 90, headers, cookie, host = 'api.kkstr.com') {
   for (p in player_ids) {
     url <- paste0(host, '/leagues/', league_id, '/players/', p, '/stats')
     r <- GET(url, headers)
