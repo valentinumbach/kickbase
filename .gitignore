@@ -5,3 +5,4 @@
 *.Rproj
 config.R
 google-oauth.json
+.httr-oauth
