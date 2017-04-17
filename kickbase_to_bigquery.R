@@ -1,7 +1,7 @@
-source('config.R')
-source('get_kickbase_data.R')
-source('bigquery.R')
-source('email_report.R')
+source('~/git/kickbase/config.R')
+source('~/git/kickbase/get_kickbase_data.R')
+source('~/git/kickbase/bigquery.R')
+source('~/git/kickbase/email_report.R')
 
 # collect data from Kickbase API
 c <- set_kickbase_connection(kickbase_user_agent)

@@ -1,4 +1,4 @@
-Sys.setenv('GCE_AUTH_FILE' = 'google-oauth.json')
+Sys.setenv('GCE_AUTH_FILE' = '~/git/kickbase/google-oauth.json')
 library(googleComputeEngineR)
 library(bigQueryR)
 
