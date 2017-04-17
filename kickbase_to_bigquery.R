@@ -1,3 +1,5 @@
+t1 <- Sys.time()
+
 source('~/git/kickbase/config.R')
 source('~/git/kickbase/get_kickbase_data.R')
 source('~/git/kickbase/bigquery.R')
@@ -27,7 +29,11 @@ write_bigquery_table(e$project_id, e$dataset_id, 'players', players)
 write_bigquery_table(e$project_id, e$dataset_id, 'performance', performance)
 write_bigquery_table(e$project_id, e$dataset_id, 'market_values', market_values)
 
+t2 <- Sys.time()
+tdiff <- t2 - t1
+
 # send report by email
 email_report(market_values,
              send_to = send_to_email,
-             send_from = send_from_email)
+             send_from = send_from_email,
+             tdiff)
