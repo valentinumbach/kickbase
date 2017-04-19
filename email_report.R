@@ -1,30 +1,48 @@
 library(gmailr)
+library(knitr)
 
 email_report <- function(market_values, send_to, send_from, tdiff) {
   market_values$dt <- as.Date(market_values$d)
-  today <- max(market_values$dt)
-  yesterday <- max(market_values$dt) - 1
-  mv <- market_values[which(market_values$dt == today), ]
-  mv$m0 <- market_values$m[which(market_values$dt == yesterday)]
-  mv$delta <- mv$m - mv$m0
-  winner_value <- paste0(format(max(mv$delta), big.mark = '.'), 'EUR')
-  winner_id <- mv$pid[which.max(mv$delta)]
-  winner_name <- paste(players$firstName[players$id == winner_id],
-                       players$lastName[players$id == winner_id])
-  loser_value <- paste0(format(min(mv$delta), big.mark = '.'), 'EUR')
-  loser_id <- mv$pid[which.min(mv$delta)]
-  loser_name <- paste(players$firstName[players$id == loser_id],
-                      players$lastName[players$id == loser_id])
+  mv_today <- market_values %>%
+    filter(dt == max(dt)) %>%
+    select(pid, dt, mv_today = m)
+  mv_yesterday <- market_values %>%
+    filter(dt == max(dt) - 1) %>%
+    select(pid, dt, mv_yesterday = m)
+  mv_change <- mv_today %>%
+    left_join(mv_yesterday, by = 'pid') %>%
+    mutate(mv_diff = mv_today - mv_yesterday) 
+  mv_change_players <- mv_change %>%
+    left_join(players, by = c('pid' = 'id')) %>%
+    mutate(name = paste(firstName, lastName)) %>%
+    mutate(name = ifelse(is.na(knownName), name, knownName)) %>%
+    select(Spieler = name, 
+           MW_Gestern = mv_today, 
+           MW_Heute = mv_yesterday, 
+           MW_Differenz = mv_diff)
+  top5 <- mv_change_players %>%
+    top_n(5, MW_Differenz) %>%
+    kable(format = 'html', format.args = list(big.mark = '.'))
+  bottom5 <- mv_change_players %>%
+    top_n(-5, MW_Differenz) %>%
+    kable(format = 'html', format.args = list(big.mark = '.'))
+  winner <- mv_change_players$Spieler[which.max(mv_change_players$MW_Differenz)]
+  loser <- mv_change_players$Spieler[which.min(mv_change_players$MW_Differenz)]
   
-  subject_line <- 'Kickbase Marktwerte: Gewinner und Verlierer'
-  body_text <- paste('Gewinner des Tages:', winner_name, winner_value, '///',
-                     'Verlierer des Tages:', loser_name, loser_value, '///',
-                     'Total time taken:', tdiff)
-  
-  daily_email <- mime(
-    To = send_to,
-    From = send_from,
-    Subject = subject_line,
-    body = body_text)
+  subject_line <- paste('Marktwert Update:', loser, 'verliert,', winner, 'gewinnt')
+  body_part1 <- paste('Hallo Manager, <br><br> die Marktwerte wurden aktualisiert. <br><br>',
+                      'Das sind die Gewinner des Tages:')
+  body_part2 <- '<br> Und das sind die Verlierer:'
+  body_part3 <- paste('<br> Du erhältst diese E-Mail als exklusives Fördermitglied ',
+                      'von Kickbase Insider. ',
+                      'Wenn du kein Interesse mehr an derartigen Benachrichtigungen hast, ',
+                      'dann wende dich bitte an deinen Administrator.')
+  email_body <- paste(body_part1, top5, body_part2, bottom5, body_part3)
+
+  daily_email <- mime() %>%
+    from(send_from) %>%
+    to(send_to) %>%
+    subject(subject_line) %>%
+    html_body(email_body)
   send_message(daily_email)
 }
