@@ -17,14 +17,16 @@ email_report <- function(market_values, send_to, send_from, tdiff) {
     mutate(name = paste(firstName, lastName)) %>%
     mutate(name = ifelse(is.na(knownName), name, knownName)) %>%
     select(Spieler = name, 
-           MW_Gestern = mv_today, 
-           MW_Heute = mv_yesterday, 
+           MW_Neu = mv_today, 
+           MW_Alt = mv_yesterday, 
            MW_Differenz = mv_diff)
   top5 <- mv_change_players %>%
     top_n(5, MW_Differenz) %>%
+    arrange(desc(MW_Differenz)) %>%
     kable(format = 'html', format.args = list(big.mark = '.'))
   bottom5 <- mv_change_players %>%
     top_n(-5, MW_Differenz) %>%
+    arrange(MW_Differenz) %>%
     kable(format = 'html', format.args = list(big.mark = '.'))
   winner <- mv_change_players$Spieler[which.max(mv_change_players$MW_Differenz)]
   loser <- mv_change_players$Spieler[which.min(mv_change_players$MW_Differenz)]
@@ -38,7 +40,7 @@ email_report <- function(market_values, send_to, send_from, tdiff) {
                       'Wenn du kein Interesse mehr an derartigen Benachrichtigungen hast, ',
                       'dann wende dich bitte an deinen Administrator.')
   email_body <- paste(body_part1, top5, body_part2, bottom5, body_part3)
-
+  
   daily_email <- mime() %>%
     from(send_from) %>%
     to(send_to) %>%
