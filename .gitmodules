@@ -1,0 +1,3 @@
+[submodule "scouts/squawka"]
+	path = scouts/squawka
+	url = https://github.com/KaviSachania/Squawka-Data-Scraper
