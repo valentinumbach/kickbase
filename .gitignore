@@ -8,3 +8,7 @@ google-oauth.json
 .httr-oauth
 *.Rout
 *.log
+
+docker/
+
+cron.R
