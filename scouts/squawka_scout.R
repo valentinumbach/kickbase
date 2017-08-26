@@ -40,8 +40,9 @@ for (t in 1:length(team_links)) {
 }
 
 
-# season 16/17 = 682
 # season 15/16 = 169
+# season 16/17 = 682
+# season 17/18 = 846
 
 # full statistics
 r <- GET("http://www.squawka.com/wp-content/themes/squawka_web/stats_process.php",

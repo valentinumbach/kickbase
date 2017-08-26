@@ -1,14 +1,20 @@
+*.Rproj
+*.Rout
+*.Rdata
+*.RDS
+*.log
+
 .Rproj.user
 .Rhistory
 .RData
 .Ruserdata
-*.Rproj
+
 config.R
 google-oauth.json
+auth.json
 .httr-oauth
-*.Rout
-*.log
 
 docker/
-
 cron.R
+gce.R
+create_vm.R
