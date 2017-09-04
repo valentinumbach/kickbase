@@ -1,19 +1,28 @@
 # Scouts
 
 ## Kickbase
-* Scores (1/w)
-* Market values (1/d)
-* Market availability (1/h)
+- [x] Scores (1/w)
+- [x] Market values (1/d)
+- [ ] Market availability (1/h)
 
 ## Ligainsider
-(1/h for squad)
+- [x] Grades (1/w)
+- [ ] Starting eleven (1/h)
+
+## SPIX (spiegel.de)
+- [ ] Scores (1/w)
 
 ## Squawka
-(1/w)
-(WhoScores, FourFourTwo StatsZone)
+- [x] Scores (1/w)
+
+## WhoScored
+- [ ] Scores (1/w)
 
 ## SoFIFA
-(1/w)
+- [x] Scores (1/w)
 
 ## Betfair
-(1/h)
+- [x] Odds (1/h)
+
+## FiveThirtyEight
+- [x] Probabilities (1/w)
