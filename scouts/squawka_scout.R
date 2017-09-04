@@ -3,7 +3,7 @@ library(httr)
 library(jsonlite)
 library(stringr)
 
-bundesliga <- read_html("http://www.squawka.com/football-stats/german-bundesliga-season-2016-2017")
+bundesliga <- read_html("http://www.squawka.com/football-stats/german-bundesliga-season-2017-2018")
 
 team_links <- bundesliga %>%
   html_nodes("#rd-league-standings .fsclt-club-link") %>%
@@ -39,17 +39,29 @@ for (t in 1:length(team_links)) {
   }
 }
 
-
 # season 15/16 = 169
 # season 16/17 = 682
 # season 17/18 = 846
 
-# full statistics
-r <- GET("http://www.squawka.com/wp-content/themes/squawka_web/stats_process.php",
-         query = list(player_id = 124,
-                      competition_id = 682,
-                      min = 1,
-                      max = 34,
-                      cub_id = 99))
-c <- content(r, "text")
-j <- fromJSON(c)
+player_performance <- data.frame(player_id = NULL,
+                                 date = NULL,
+                                 total = NULL,
+                                 possesion = NULL,
+                                 attack = NULL,
+                                 defence = NULL)
+for (p in 1:nrow(all_players)) {
+  cat("Fetching player", p, "of", nrow(all_players), "\n")
+  # full statistics
+  r <- GET("http://www.squawka.com/wp-content/themes/squawka_web/stats_process.php",
+           query = list(player_id = all_players$player_id[p],
+                        competition_id = 846,
+                        min = 1,
+                        max = 34))
+  c <- content(r, "text")
+  j <- fromJSON(c)
+  if (length(j$performance > 0)) {
+    player_performance <- rbind(player_performance, 
+                                cbind(player_id = all_players$player_id[p], 
+                                      j$performance))
+  }
+}
